@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { storage } from "./storage.js";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer, Cell } from "recharts";
 
 /* ═══════════════════════════════════════════════════════
@@ -439,9 +438,9 @@ export default function App() {
   const [toast,      setToast]      = useState(null);
   const [editingCap, setEditingCap] = useState(false);
   const [newCap,     setNewCap]     = useState("");
-  const [hovBar,     setHovBar]     = useState(null);
+  const [hovBar,        setHovBar]        = useState(null);
+  const [confirmReset,  setConfirmReset]  = useState(false);
   const [notConfigured, setNotConfigured] = useState(false);
-  const [confirmReset, setConfirmReset] = useState(false);
 
   /* ── Toast ── */
   const showToast = (msg, color=P.green) => {
@@ -450,12 +449,11 @@ export default function App() {
 
   /* ── Storage ── */
   useEffect(() => {
-    if (!storage.isConfigured()) { setNotConfigured(true); setLoading(false); return; }
     (async () => {
       try {
         const [cr,er] = await Promise.all([
-          storage.get("tj_cap").catch(()=>null),
-          storage.get("tj_ent").catch(()=>null),
+          window.storage.get("tj5_cap").catch(()=>null),
+          window.storage.get("tj5_ent").catch(()=>null),
         ]);
         if (cr) setCapital(Number(cr.value)); else setSetupMode(true);
         if (er) setEntries(JSON.parse(er.value));
@@ -465,11 +463,11 @@ export default function App() {
   }, []);
 
   const saveEntries = useCallback(async upd => {
-    await storage.set("tj_ent",JSON.stringify(upd)).catch(()=>{});
+    await window.storage.set("tj5_ent",JSON.stringify(upd)).catch(()=>{});
     setEntries(upd);
   }, []);
   const saveCap = async val => {
-    await storage.set("tj_cap",String(val)).catch(()=>{});
+    await window.storage.set("tj5_cap",String(val)).catch(()=>{});
     setCapital(val);
   };
 
@@ -557,8 +555,8 @@ export default function App() {
   };
 
   const handleReset = async () => {
-    await storage.set("tj_cap","").catch(()=>{});
-    await storage.set("tj_ent","{}").catch(()=>{});
+    await window.storage.set("tj5_cap","").catch(()=>{});
+    await window.storage.set("tj5_ent","{}").catch(()=>{});
     setCapital(null); setEntries({}); setConfirmReset(false);
     setSetupMode(true);
     showToast("Journal reset — enter your starting capital to begin","#FFB020");
@@ -695,7 +693,7 @@ export default function App() {
       <div style={{padding:"26px 32px",maxWidth:1200,margin:"0 auto"}}>
 
         {/* ── STAT CARDS ── */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:14,marginBottom:26}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:10,marginBottom:26}}>
           <StatCard
             label="Starting Capital"
             value={fmtINR(capital)}
@@ -725,13 +723,20 @@ export default function App() {
             accent={roiClr(overallROI)}
             sub={winRate!=null?`${winRate}% win rate`:"—"}
           />
+          <StatCard
+            label="Total Withdrawn"
+            value={fmtINR(totalWd)}
+            accent={P.amber}
+            sub="Booked out of profits"
+          />
+
           {/* Wins/losses card with optional streak badge */}
           <div style={{position:"relative"}}>
             <StatCard
               label="Wins · Losses"
               value={`${wins}W  ${losses}L`}
               accent={wins>=losses?P.green:P.red}
-              sub={totalWd>0?`${fmtINR(totalWd)} withdrawn`:"No withdrawals"}
+              sub={`${tradeDays.length} trading days`}
             />
             {streak>=2 && (
               <div className="streak-pulse" style={{
@@ -1082,14 +1087,16 @@ export default function App() {
           // Running capital + cumulative P&L series for recharts
           let runCap=capital||0, cumPnl=0;
           const chartData = tdays.map(e=>{
-            const pnl=Number(e.pnl), wd=Number(e.withdrawal||0);
+            const grossPnl=Number(e.pnl), brok=0, pnl=grossPnl-brok, wd=Number(e.withdrawal||0);
             cumPnl+=pnl;
             const capBefore=runCap;
             runCap=runCap+pnl-wd;
             return {
-              date:     e.date.slice(5),       // MM-DD for axis
+              date:     e.date.slice(5),
               fullDate: e.date,
-              pnl,
+              grossPnl,
+              brokerage: brok,
+              pnl,         // net P&L
               cumPnl,
               capital:  runCap,
               growthPct: capital ? parseFloat(((runCap-capital)/capital*100).toFixed(2)) : 0,
@@ -1135,7 +1142,7 @@ export default function App() {
             const d=payload[0]?.payload;
             return (
               <div style={{background:"#131C30",border:`1px solid ${P.border2}`,borderRadius:10,
-                padding:"12px 16px",fontSize:11,lineHeight:2,minWidth:160,
+                padding:"12px 16px",fontSize:11,lineHeight:2,minWidth:180,
                 boxShadow:"0 8px 30px rgba(0,0,0,.6)"}}>
                 <div className="mono" style={{color:P.sub,marginBottom:4}}>{d?.fullDate}</div>
                 <div className="mono" style={{color:d?.pnl>=0?P.green:P.red,fontWeight:700,fontSize:14}}>
