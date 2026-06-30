@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { storage } from "./storage.js";
 import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer, Cell } from "recharts";
 
 /* ═══════════════════════════════════════════════════════
@@ -449,11 +450,12 @@ export default function App() {
 
   /* ── Storage ── */
   useEffect(() => {
+    if (!storage.isConfigured()) { setNotConfigured(true); setLoading(false); return; }
     (async () => {
       try {
         const [cr,er] = await Promise.all([
-          window.storage.get("tj5_cap").catch(()=>null),
-          window.storage.get("tj5_ent").catch(()=>null),
+          storage.get("tj_cap").catch(()=>null),
+          storage.get("tj_ent").catch(()=>null),
         ]);
         if (cr) setCapital(Number(cr.value)); else setSetupMode(true);
         if (er) setEntries(JSON.parse(er.value));
@@ -463,11 +465,11 @@ export default function App() {
   }, []);
 
   const saveEntries = useCallback(async upd => {
-    await window.storage.set("tj5_ent",JSON.stringify(upd)).catch(()=>{});
+    await storage.set("tj_ent",JSON.stringify(upd)).catch(()=>{});
     setEntries(upd);
   }, []);
   const saveCap = async val => {
-    await window.storage.set("tj5_cap",String(val)).catch(()=>{});
+    await storage.set("tj_cap",String(val)).catch(()=>{});
     setCapital(val);
   };
 
@@ -555,8 +557,8 @@ export default function App() {
   };
 
   const handleReset = async () => {
-    await window.storage.set("tj5_cap","").catch(()=>{});
-    await window.storage.set("tj5_ent","{}").catch(()=>{});
+    await storage.set("tj_cap","").catch(()=>{});
+    await storage.set("tj_ent","{}").catch(()=>{});
     setCapital(null); setEntries({}); setConfirmReset(false);
     setSetupMode(true);
     showToast("Journal reset — enter your starting capital to begin","#FFB020");
@@ -566,6 +568,34 @@ export default function App() {
   const dayCount = dim(calYear,calMonth);
   const padDays  = firstDay(calYear,calMonth);
   const sortedLog = Object.values(entries).filter(e=>e.date).sort((a,b)=>b.date.localeCompare(a.date));
+
+  /* ════════════════════════════════════════
+     NOT CONFIGURED
+  ════════════════════════════════════════ */
+  if(notConfigured) return (
+    <div className="tj" style={{minHeight:"100vh",background:P.bg,display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <style>{CSS}</style>
+      <div style={{
+        background:"linear-gradient(150deg,#121B30 0%,#0C1220 55%,#080C18 100%)",
+        border:`1px solid ${P.amberGlow}.3)`,borderRadius:24,padding:"48px 44px",width:480,
+        textAlign:"center",
+        boxShadow:`0 40px 100px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.05)`,
+      }}>
+        <div style={{fontSize:36,marginBottom:18}}>🔑</div>
+        <div style={{fontSize:22,fontWeight:900,color:P.text,marginBottom:8}}>JSONBin Not Connected</div>
+        <div style={{fontSize:11,color:P.muted,lineHeight:1.9,marginBottom:20,textAlign:"left"}}>
+          This app could not find your JSONBin credentials.<br/><br/>
+          Check that your GitHub repo has these two <strong style={{color:P.amber}}>Secrets</strong> set correctly:<br/><br/>
+          <code style={{display:"block",background:P.faint,padding:"10px 14px",borderRadius:8,fontSize:11,textAlign:"left",color:P.green,lineHeight:2}}>
+            VITE_JSONBIN_BIN_ID<br/>
+            VITE_JSONBIN_API_KEY
+          </code><br/>
+          Go to: Repo → Settings → Secrets and variables → Actions.<br/>
+          After fixing, re-run the GitHub Action to redeploy.
+        </div>
+      </div>
+    </div>
+  );
 
   /* ════════════════════════════════════════
      LOADING
