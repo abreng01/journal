@@ -131,6 +131,98 @@ const MONTHS = ["January","February","March","April","May","June","July","August
 const WDAYS  = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
 
 /* ═══════════════════════════════════════════════════════
+   DAILY QUOTES — discipline, risk control, staying grounded
+═══════════════════════════════════════════════════════ */
+const QUOTES = [
+  { q:"The goal of a successful trader is to make the best trades. Money is secondary.", a:"Alexander Elder" },
+  { q:"Risk comes from not knowing what you're doing.", a:"Warren Buffett" },
+  { q:"The market can stay irrational longer than you can stay solvent.", a:"John Maynard Keynes" },
+  { q:"Amateurs think about how much money they can make. Professionals think about how much money they could lose.", a:"Jack Schwager" },
+  { q:"It's not whether you're right or wrong, but how much money you make when you're right and how much you lose when you're wrong.", a:"George Soros" },
+  { q:"The four most dangerous words in investing are: this time it's different.", a:"Sir John Templeton" },
+  { q:"In trading, the impossible happens about twice a year.", a:"Henri M. Simoes" },
+  { q:"Cut your losses short and let your profits run.", a:"David Ricardo" },
+  { q:"The trend is your friend until the end when it bends.", a:"Ed Seykota" },
+  { q:"Markets are never wrong, opinions often are.", a:"Jesse Livermore" },
+  { q:"Don't focus on making money; focus on protecting what you have.", a:"Paul Tudor Jones" },
+  { q:"The big money is not in the buying and selling, but in the waiting.", a:"Jesse Livermore" },
+  { q:"Risk management is the most important aspect of trading.", a:"Larry Hite" },
+  { q:"The hardest thing to do in trading is doing nothing.", a:"Jim Rogers" },
+  { q:"There is a time to go long, a time to go short, and a time to go fishing.", a:"Jesse Livermore" },
+  { q:"Position sizing is more important than entry point.", a:"Van Tharp" },
+  { q:"Discipline is choosing between what you want now and what you want most.", a:"Abraham Lincoln" },
+  { q:"I'm always thinking about losing money as opposed to making money.", a:"Paul Tudor Jones" },
+  { q:"The elements of good trading are: cutting losses, cutting losses, and cutting losses.", a:"Ed Seykota" },
+  { q:"Know what you own, and know why you own it.", a:"Peter Lynch" },
+  { q:"Be fearful when others are greedy, and greedy when others are fearful.", a:"Warren Buffett" },
+  { q:"The stock market is a device for transferring money from the impatient to the patient.", a:"Warren Buffett" },
+  { q:"It is not the strongest of the species that survives, but the one most responsive to change.", a:"Charles Darwin" },
+  { q:"Limit your size in any position so that fear does not become the dominant decision-making emotion.", a:"Larry Hite" },
+  { q:"My success in the market has come from my love of the chase, not just the money.", a:"Paul Tudor Jones" },
+  { q:"If you personalize losses, you can't trade.", a:"Bruce Kovner" },
+  { q:"The key to trading success is emotional discipline.", a:"Victor Sperandeo" },
+  { q:"Every trader has strengths and weaknesses. Some are good holders of winners but may hold their losers too long.", a:"Michael Marcus" },
+  { q:"Frankly, I don't see markets; I see risks, rewards, and money.", a:"Larry Hite" },
+  { q:"Good trading is not about being right, it's about trading right.", a:"Justin Mamis" },
+  { q:"Don't worry about what the markets are going to do, worry about what you are going to do in response.", a:"Michael Carr" },
+  { q:"In trading and investing, what is comfortable is rarely profitable.", a:"Robert Arnott" },
+  { q:"The most important thing for any trader is having a method to minimize losses.", a:"Jesse Livermore" },
+  { q:"Markets are constantly in a state of uncertainty and flux, and money is made by discounting the obvious and betting on the unexpected.", a:"George Soros" },
+  { q:"A speculator is a man who observes the future, and acts before it occurs.", a:"Bernard Baruch" },
+  { q:"Successful trading is about finding the rules that work and then sticking to those rules.", a:"William Eckhardt" },
+  { q:"The market is designed to fool most of the people most of the time.", a:"Jesse Livermore" },
+  { q:"Don't gamble; take all your savings and buy some good stock and hold it till it goes up, then sell it. If it don't go up, don't buy it.", a:"Will Rogers" },
+  { q:"It's not the bulls or the bears that get slaughtered in the market, it's the pigs.", a:"Wall Street Saying" },
+  { q:"Money is made by sitting, not trading.", a:"Jesse Livermore" },
+  { q:"Time is your friend; impulse is your enemy.", a:"John C. Bogle" },
+  { q:"The investor's chief problem, and even his worst enemy, is likely to be himself.", a:"Benjamin Graham" },
+  { q:"Wide diversification is only required when investors do not understand what they are doing.", a:"Warren Buffett" },
+  { q:"Price is what you pay. Value is what you get.", a:"Warren Buffett" },
+  { q:"The individual investor should act consistently as an investor and not as a speculator.", a:"Benjamin Graham" },
+  { q:"In the short run, the market is a voting machine; in the long run, it is a weighing machine.", a:"Benjamin Graham" },
+  { q:"An investment in knowledge pays the best interest.", a:"Benjamin Franklin" },
+  { q:"Bulls make money, bears make money, pigs get slaughtered.", a:"Wall Street Saying" },
+  { q:"The four most expensive words in investing are 'this time is different.'", a:"Sir John Templeton" },
+  { q:"To be a great trader, you have to be willing to lose. If you're not willing to lose, you have no business being involved.", a:"Tom Baldwin" },
+  { q:"Diversification is protection against ignorance. It makes little sense if you know what you are doing.", a:"Warren Buffett" },
+  { q:"An investment in knowledge always pays the best dividends.", a:"Benjamin Franklin" },
+  { q:"The four pillars of investment success: patience, discipline, courage, and conviction.", a:"David Dreman" },
+  { q:"Successful investing is anticipating the anticipations of others.", a:"John Maynard Keynes" },
+  { q:"The most contrarian thing of all is not to oppose the crowd but to think for yourself.", a:"Peter Thiel" },
+  { q:"Only when the tide goes out do you discover who's been swimming naked.", a:"Warren Buffett" },
+  { q:"The intelligent investor is a realist who sells to optimists and buys from pessimists.", a:"Benjamin Graham" },
+  { q:"Rule No. 1: Never lose money. Rule No. 2: Never forget rule No. 1.", a:"Warren Buffett" },
+  { q:"It's far better to buy a wonderful company at a fair price than a fair company at a wonderful price.", a:"Warren Buffett" },
+  { q:"The whole secret of winning at the racetrack is money management.", a:"Jesse Livermore" },
+  { q:"A man who is right always has two forces working in his favor: basic conditions and the unthinking minority.", a:"Jesse Livermore" },
+  { q:"There is nothing new in Wall Street. Whatever happens has happened before and will happen again.", a:"Jesse Livermore" },
+  { q:"Buy not on optimism, but on arithmetic.", a:"Benjamin Graham" },
+  { q:"In the world of business, the people who are most successful are those who are doing what they love.", a:"Warren Buffett" },
+  { q:"The stock market is filled with individuals who know the price of everything, but the value of nothing.", a:"Philip Fisher" },
+  { q:"Far more money has been lost by investors trying to anticipate corrections than has been lost in the corrections themselves.", a:"Peter Lynch" },
+  { q:"Trade what's happening, not what you think is going to happen.", a:"Doug Gregory" },
+  { q:"Everybody gets the same data. It's what you do with it that counts.", a:"William O'Neil" },
+  { q:"If you don't know who you are, the stock market is an expensive place to find out.", a:"Adam Smith" },
+  { q:"Markets can remain irrational longer than you can remain solvent.", a:"John Maynard Keynes" },
+  { q:"Trading doesn't just reveal your character, it also builds it if you let it.", a:"Yvan Byeajee" },
+  { q:"The market is a voting machine in the short run, but a weighing machine in the long run.", a:"Benjamin Graham" },
+  { q:"Cut your losses and let your winners run.", a:"Old Wall Street Adage" },
+  { q:"Buy low, sell high — easier said than done.", a:"Old Wall Street Adage" },
+  { q:"Markets can remain irrational far longer than most traders can remain solvent.", a:"Attributed to John Maynard Keynes" },
+  { q:"The goal is not to be right every time, but to make money over time.", a:"Trading Proverb" },
+];
+
+const getDailyQuote = () => {
+  // Day-of-year based index so all 365 quotes cycle once per calendar year
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 0);
+  const diff = now - startOfYear;
+  const dayOfYear = Math.floor(diff / 86400000);
+  const idx = dayOfYear % QUOTES.length;
+  return QUOTES[idx];
+};
+
+/* ═══════════════════════════════════════════════════════
    HELPERS
 ═══════════════════════════════════════════════════════ */
 const fmtINR = (n, sign = false) => {
@@ -716,6 +808,24 @@ export default function App() {
           TICKER
       ══════════════════════════════ */}
       <Ticker items={tickerItems} />
+
+      {/* ══════════════════════════════
+          DAILY QUOTE BANNER
+      ══════════════════════════════ */}
+      <div style={{
+        background:"linear-gradient(90deg,rgba(91,158,255,.05),rgba(167,139,250,.05))",
+        borderBottom:`1px solid ${P.border}`,
+        padding:"12px 32px",
+        display:"flex",alignItems:"center",justifyContent:"center",gap:10,
+      }}>
+        <span style={{fontSize:13,opacity:0.7}}>💭</span>
+        <span style={{fontSize:12,color:P.sub,fontStyle:"italic",textAlign:"center"}}>
+          "{getDailyQuote().q}"
+          <span style={{color:P.muted,fontStyle:"normal",marginLeft:8,fontSize:11}}>
+            — {getDailyQuote().a}
+          </span>
+        </span>
+      </div>
 
       {/* ══════════════════════════════
           BODY
