@@ -254,7 +254,7 @@ const computeROIs = (entries, startCap) => {
   const dailyROI={}, wg={}, mg={};
 
   for (const e of days) {
-    const pnl=Number(e.pnl), wd=Number(e.withdrawal||0);
+    const pnl=Number(e.pnl), wd=Number(e.withdrawal||0), dep=Number(e.deposit||0);
     dailyROI[e.date] = cap>0 ? (pnl/cap)*100 : 0;
 
     const wk=`${e.date.slice(0,4)}-W${String(weekNum(e.date)).padStart(2,"0")}`;
@@ -265,7 +265,7 @@ const computeROIs = (entries, startCap) => {
     if(!mg[mk]) mg[mk]={pnl:0,cap};
     mg[mk].pnl+=pnl;
 
-    cap = cap+pnl-wd;
+    cap = cap+pnl-wd+dep;
   }
 
   return {
@@ -289,7 +289,7 @@ const computeStreak = entries => {
 ═══════════════════════════════════════════════════════ */
 const exportCSV = (entries, cap) => {
   const { dailyROI } = computeROIs(entries, cap);
-  const rows=[["Date","Type","Instrument","P&L (INR)","Withdrawal (INR)","Daily ROI (%)","Notes"]];
+  const rows=[["Date","Type","Instrument","P&L (INR)","Withdrawal (INR)","Deposit (INR)","Daily ROI (%)","Notes"]];
   Object.values(entries)
     .filter(e=>e.date)
     .sort((a,b)=>a.date.localeCompare(b.date))
@@ -297,6 +297,7 @@ const exportCSV = (entries, cap) => {
       e.date, e.type, e.instrument||"",
       e.type==="trade"?(e.pnl??""):"",
       e.withdrawal||"",
+      e.type==="trade"?(e.deposit||""):"",
       e.type==="trade"&&dailyROI[e.date]!=null?dailyROI[e.date].toFixed(2):"",
       (e.notes||"").replace(/,/g,";"),
     ]));
@@ -513,7 +514,7 @@ const Td = ({ children, style:sx }) => (
 /* ═══════════════════════════════════════════════════════
    BLANK ENTRY
 ═══════════════════════════════════════════════════════ */
-const blank = d => ({ date:d, type:"trade", instrument:"", pnl:"", withdrawal:"", notes:"" });
+const blank = d => ({ date:d, type:"trade", instrument:"", pnl:"", withdrawal:"", deposit:"", notes:"" });
 
 /* ═══════════════════════════════════════════════════════
    MAIN APP
@@ -569,7 +570,8 @@ export default function App() {
   const tradeDays  = Object.values(entries).filter(e => e.type==="trade"&&e.pnl!==""&&e.pnl!==null);
   const totalPnl   = tradeDays.reduce((s,e) => s+Number(e.pnl), 0);
   const totalWd    = Object.values(entries).reduce((s,e) => s+(Number(e.withdrawal)||0), 0);
-  const curCap     = capital!=null ? capital+totalPnl-totalWd : null;
+  const totalDep   = Object.values(entries).reduce((s,e) => s+(Number(e.deposit)||0), 0);
+  const curCap     = capital!=null ? capital+totalPnl-totalWd+totalDep : null;
   const wins       = tradeDays.filter(e => Number(e.pnl)>0).length;
   const losses     = tradeDays.filter(e => Number(e.pnl)<0).length;
   const winRate    = tradeDays.length ? Math.round((wins/tradeDays.length)*100) : null;
@@ -596,6 +598,7 @@ export default function App() {
     {label:"WIN RATE",    value:winRate!=null?`${winRate}%`:"—",                 color:winRate>=50?P.green:P.red},
     {label:"THIS MONTH",  value:fmtINR(monthPnl,true),                           color:monthPnl>=0?P.green:P.red},
     {label:"WITHDRAWN",   value:fmtINR(totalWd),                                 color:P.amber},
+    {label:"DEPOSITED",   value:totalDep>0?fmtINR(totalDep):"—",               color:P.blue},
     {label:"TRADE DAYS",  value:String(tradeDays.length),                        color:P.sub},
     {label:"WIN STREAK",  value:streak>0?`🔥 ${streak}`:"—",                    color:P.amber},
   ];
@@ -849,7 +852,7 @@ export default function App() {
             label="Current Capital"
             value={fmtINR(curCap)}
             accent={curCap>=capital?P.green:P.red}
-            sub="Start + P&L − Withdrawn"
+            sub="Start + P&L − Withdrawn + Deposited"
           />
           <StatCard
             label="Net P&L"
@@ -1054,7 +1057,7 @@ export default function App() {
                   <thead>
                     <tr>
                       <Th>Date</Th><Th>Type</Th><Th>Instrument</Th>
-                      <Th>P&L</Th><Th>Daily ROI</Th><Th>Withdrawal</Th>
+                      <Th>P&L</Th><Th>Daily ROI</Th><Th>Withdrawal</Th><Th>Deposit</Th>
                       <Th>Notes</Th><Th></Th>
                     </tr>
                   </thead>
@@ -1084,6 +1087,11 @@ export default function App() {
                           <Td>
                             {Number(e.withdrawal)>0
                               ? <span className="mono" style={{color:P.amber,fontWeight:600}}>{fmtINR(e.withdrawal)}</span>
+                              : <span style={{color:P.faint}}>—</span>}
+                          </Td>
+                          <Td>
+                            {Number(e.deposit||0)>0
+                              ? <span className="mono" style={{color:P.blue,fontWeight:600}}>+{fmtINR(e.deposit)}</span>
                               : <span style={{color:P.faint}}>—</span>}
                           </Td>
                           <Td style={{color:P.sub,fontSize:11,maxWidth:180,
@@ -1126,6 +1134,7 @@ export default function App() {
                   ["Starting",     fmtINR(capital),           P.sub],
                   ["+ Net P&L",    fmtINR(totalPnl,true),     pnlClr(totalPnl)],
                   ["− Withdrawn",  fmtINR(totalWd),           P.amber],
+                  ["+ Deposited",  totalDep>0?fmtINR(totalDep):"—", P.blue],
                   ["= Current",    fmtINR(curCap),            curCap>=capital?P.green:P.red],
                   ["Overall ROI",  fmtROI(overallROI),        roiClr(overallROI)],
                   ["Win Rate",     winRate!=null?`${winRate}%`:"—", winRate>=50?P.green:P.red],
@@ -1227,10 +1236,10 @@ export default function App() {
           // Running capital + cumulative P&L series for recharts
           let runCap=capital||0, cumPnl=0;
           const chartData = tdays.map(e=>{
-            const grossPnl=Number(e.pnl), brok=0, pnl=grossPnl-brok, wd=Number(e.withdrawal||0);
+            const grossPnl=Number(e.pnl), brok=0, pnl=grossPnl-brok, wd=Number(e.withdrawal||0), dep=Number(e.deposit||0);
             cumPnl+=pnl;
             const capBefore=runCap;
-            runCap=runCap+pnl-wd;
+            runCap=runCap+pnl-wd+dep;
             return {
               date:     e.date.slice(5),
               fullDate: e.date,
@@ -1699,13 +1708,24 @@ export default function App() {
                 </div>
               </div>
 
-              <div style={{marginBottom:18}}>
-                <Lbl>Withdrawal from Today's Profit (₹) — optional</Lbl>
-                <Inp type="number" placeholder="0"
-                  value={modal.entry.withdrawal} onChange={e=>updM("withdrawal",e.target.value)}
-                  style={{color:P.amber}}/>
-                <div style={{fontSize:9,color:P.muted,marginTop:5}}>
-                  Reduces capital pool. Does not affect P&L.
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:18}}>
+                <div>
+                  <Lbl>Withdrawal from Profit (₹) — optional</Lbl>
+                  <Inp type="number" placeholder="0"
+                    value={modal.entry.withdrawal} onChange={e=>updM("withdrawal",e.target.value)}
+                    style={{color:P.amber}}/>
+                  <div style={{fontSize:9,color:P.muted,marginTop:5}}>
+                    Reduces capital pool. Does not affect P&L.
+                  </div>
+                </div>
+                <div>
+                  <Lbl>Deposit / Top-up (₹) — optional</Lbl>
+                  <Inp type="number" placeholder="0"
+                    value={modal.entry.deposit} onChange={e=>updM("deposit",e.target.value)}
+                    style={{color:P.blue}}/>
+                  <div style={{fontSize:9,color:P.muted,marginTop:5}}>
+                    Re-depositing withdrawn profits. Adds back to capital.
+                  </div>
                 </div>
               </div>
             </>)}
