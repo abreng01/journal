@@ -597,7 +597,7 @@ export default function App() {
     {label:"OVERALL ROI", value:fmtROI(overallROI),                              color:roiClr(overallROI)},
     {label:"WIN RATE",    value:winRate!=null?`${winRate}%`:"—",                 color:winRate>=50?P.green:P.red},
     {label:"THIS MONTH",  value:fmtINR(monthPnl,true),                           color:monthPnl>=0?P.green:P.red},
-    {label:"WITHDRAWN",   value:fmtINR(totalWd),                                 color:P.amber},
+    {label:"NET WITHDRAWN", value:fmtINR(Math.max(0,totalWd-totalDep)),           color:P.amber},
     {label:"DEPOSITED",   value:totalDep>0?fmtINR(totalDep):"—",               color:P.blue},
     {label:"TRADE DAYS",  value:String(tradeDays.length),                        color:P.sub},
     {label:"WIN STREAK",  value:streak>0?`🔥 ${streak}`:"—",                    color:P.amber},
@@ -867,10 +867,10 @@ export default function App() {
             sub={winRate!=null?`${winRate}% win rate`:"—"}
           />
           <StatCard
-            label="Total Withdrawn"
-            value={fmtINR(totalWd)}
+            label="Net Withdrawn"
+            value={fmtINR(Math.max(0, totalWd-totalDep))}
             accent={P.amber}
-            sub="Booked out of profits"
+            sub={totalDep>0?`Gross ${fmtINR(totalWd)} − ${fmtINR(totalDep)} redeposited`:"Booked out of profits"}
           />
 
           {/* Wins/losses card with optional streak badge */}
@@ -1134,7 +1134,8 @@ export default function App() {
                   ["Starting",     fmtINR(capital),           P.sub],
                   ["+ Net P&L",    fmtINR(totalPnl,true),     pnlClr(totalPnl)],
                   ["− Withdrawn",  fmtINR(totalWd),           P.amber],
-                  ["+ Deposited",  totalDep>0?fmtINR(totalDep):"—", P.blue],
+                  ["+ Re-deposited", totalDep>0?fmtINR(totalDep):"—", P.blue],
+                  ["= Net Withdrawn", fmtINR(Math.max(0,totalWd-totalDep)), P.amber],
                   ["= Current",    fmtINR(curCap),            curCap>=capital?P.green:P.red],
                   ["Overall ROI",  fmtROI(overallROI),        roiClr(overallROI)],
                   ["Win Rate",     winRate!=null?`${winRate}%`:"—", winRate>=50?P.green:P.red],
@@ -1593,6 +1594,8 @@ export default function App() {
                 ["Starting Capital",  fmtINR(capital),                          P.sub],
                 ["Net P&L",           fmtINR(totalPnl,true),                    pnlClr(totalPnl)],
                 ["Total Withdrawn",   fmtINR(totalWd),                          P.amber],
+                ["Re-deposited",      fmtINR(totalDep),                         P.blue],
+                ["Net Withdrawn",     fmtINR(Math.max(0,totalWd-totalDep)),    P.amber],
                 ["Current Capital",   fmtINR(curCap),                           curCap>=capital?P.green:P.red],
                 ["Overall ROI",       fmtROI(overallROI),                       roiClr(overallROI)],
                 ["Total Trade Days",  String(tradeDays.length),                  P.sub],
