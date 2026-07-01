@@ -836,7 +836,7 @@ export default function App() {
       <div style={{padding:"26px 32px",maxWidth:1200,margin:"0 auto"}}>
 
         {/* ── STAT CARDS ── */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:10,marginBottom:26}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:10,marginBottom:26}}>
           <StatCard
             label="Starting Capital"
             value={fmtINR(capital)}
@@ -865,6 +865,12 @@ export default function App() {
             value={fmtROI(overallROI)}
             accent={roiClr(overallROI)}
             sub={winRate!=null?`${winRate}% win rate`:"—"}
+          />
+          <StatCard
+            label={`${MONTHS[calMonth]} ROI`}
+            value={monthROI!==undefined?fmtROI(monthROI):"—"}
+            accent={monthROI!==undefined?roiClr(monthROI):P.muted}
+            sub={`${fmtINR(monthPnl,true)} this month`}
           />
           <StatCard
             label="Net Withdrawn"
