@@ -350,8 +350,10 @@ function StatCard({ label, value, sub, accent, flashKey }) {
 
       <div style={{ fontSize:9,fontWeight:700,color:P.muted,letterSpacing:"0.2em",
         textTransform:"uppercase",marginBottom:10,position:"relative" }}>{label}</div>
-      <div ref={ref} className="mono" style={{ fontSize:22,fontWeight:700,color:g,
-        letterSpacing:"-0.03em",lineHeight:1,position:"relative" }}>{value}</div>
+      <div ref={ref} className="mono" style={{
+        fontSize: typeof value==='string' && value.length>10 ? 16 : typeof value==='string' && value.length>8 ? 18 : 22,
+        fontWeight:700,color:g,
+        letterSpacing:"-0.03em",lineHeight:1.2,position:"relative",wordBreak:"keep-all",whiteSpace:"nowrap" }}>{value}</div>
       {sub && <div style={{ fontSize:10,color:P.muted,marginTop:9,position:"relative" }}>{sub}</div>}
     </div>
   );
